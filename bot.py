@@ -28,19 +28,15 @@ async def start(message: types.Message):
 
 # Начало теста
 @dp.callback_query(lambda c: c.data == "start_test")
-async def start_test(callback: types.CallbackQuery):
-    selected = random.sample(questions, 15 if len(questions) >= 15 else len(questions))
-
-    user_sessions[callback.from_user.id] = {
-        "current": 0,
-        "score": 0,
-        "questions": selected,
-        "answers": []
-    }
-
-    await send_question(callback.from_user.id)
+async def choose_theme(callback: types.CallbackQuery):
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🏛 СССР", callback_data="theme_ussr")],
+        [InlineKeyboardButton(text="👑 Империя", callback_data="theme_empire")],
+        [InlineKeyboardButton(text="⚔ Древняя Русь", callback_data="theme_rus")],
+        [InlineKeyboardButton(text="🌍 Всемирная", callback_data="theme_world")]
+    ])
+    await callback.message.edit_text("Выберите тему:", reply_markup=kb)
     await callback.answer()
-
 async def send_question(user_id):
     session = user_sessions[user_id]
     q = session["questions"][session["current"]]
@@ -54,20 +50,79 @@ async def send_question(user_id):
                 callback_data=f"answer_{i}"
             )]
         )
+@dp.callback_query(lambda c: c.data.startswith("theme_"))
+async def start_test(callback: types.CallbackQuery):
+    theme = callback.data.split("_")[1]
+    theme_questions = questions[theme]
 
-    # Кнопка назад
-    if session["current"] > 0:
-        buttons.append(
-            [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
-        )
+    selected = random.sample(
+        theme_questions,
+        15 if len(theme_questions) >= 15 else len(theme_questions)
+    )
 
-    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
+    user_sessions[callback.from_user.id] = {
+        "current": 0,
+        "score": 0,
+        "questions": selected,
+        "theme": theme
+    }
 
+    async def send_question(user_id):
+    session = user_sessions[user_id]
+    q = session["questions"][session["current"]]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=opt, callback_data=f"answer_{i}")]
+        for i, opt in enumerate(q["options"])
+    ])
+
+    message = await bot.send_message(
+        user_id,
+        f"📘 Вопрос {session['current']+1}/{len(session['questions'])}\n\n{q['question']}",
+        reply_markup=kb
+    )
+
+    session["last_message_id"] = message.message_id
     await bot.send_message(
         user_id,
         f"📘 Вопрос {session['current'] + 1}/{len(session['questions'])}\n\n{q['question']}",
         reply_markup=kb
     )
+    @dp.callback_query(lambda c: c.data.startswith("answer_"))
+async def handle_answer(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+    session = user_sessions[user_id]
+
+    answer = int(callback.data.split("_")[1])
+    q = session["questions"][session["current"]]
+
+    # удаляем прошлый вопрос
+    try:
+        await bot.delete_message(user_id, session["last_message_id"])
+    except:
+        pass
+
+    if answer == q["correct"]:
+        session["score"] += 1
+
+    session["current"] += 1
+
+    if session["current"] < len(session["questions"]):
+        await send_question(user_id)
+    else:
+        score = session["score"]
+        await save_result(user_id, score)
+
+        await bot.send_message(
+            user_id,
+            f"🎉 Тест завершён!\n\n"
+            f"Тема: {session['theme'].upper()}\n"
+            f"Результат: {score}/{len(session['questions'])}"
+        )
+
+        del user_sessions[user_id]
+
+    await callback.answer()
 # Ответ
 @dp.callback_query(lambda c: c.data.startswith("answer_"))
 async def handle_answer(callback: types.CallbackQuery):
