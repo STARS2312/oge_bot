@@ -132,7 +132,11 @@ async def handle_answer(callback: types.CallbackQuery):
     answer = int(callback.data.split("_")[1])
     q = session["questions"][session["current"]]
 
-    session["answers"].append(answer)
+    # удаляем прошлое сообщение
+    try:
+        await bot.delete_message(user_id, session["last_message_id"])
+    except:
+        pass
 
     if answer == q["correct"]:
         session["score"] += 1
@@ -144,10 +148,13 @@ async def handle_answer(callback: types.CallbackQuery):
     else:
         score = session["score"]
         await save_result(user_id, score)
+
         await bot.send_message(
             user_id,
-            f"🎉 Тест завершён!\n\nВаш результат: {score}/{len(session['questions'])}"
+            f"🎉 Тест завершён!\n\n"
+            f"Результат: {score}/{len(session['questions'])}"
         )
+
         del user_sessions[user_id]
 
     await callback.answer()
