@@ -179,26 +179,37 @@ WEBHOOK_PATH = "/webhook"
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
 
 async def on_startup(app):
+    print("STARTUP CALLED")
+
     await init_db()
 
-    webhook_url = "https://ogebot-production.up.railway.app"
+    webhook_url = "https://ogebot-production.up.railway.app/webhook"
 
     await bot.set_webhook(
         webhook_url,
         secret_token=WEBHOOK_SECRET
     )
 
-    print(f"Webhook set to {webhook_url}")
+    print("WEBHOOK INSTALLED:", webhook_url)
+    
 async def on_shutdown(app):
-    print("Shutting down...")
+    print("SHUTDOWN CALLED")
     await bot.delete_webhook()
     await bot.session.close()
 
+async def health_check(request):
+    return web.Response(text="OK")
+    
+
 async def handle_webhook(request):
+    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
+        return web.Response(status=403)
+
     data = await request.json()
     update = types.Update(**data)
     await dp.feed_update(bot, update)
     return web.Response()
+
 
 def create_app():
     app = web.Application()
