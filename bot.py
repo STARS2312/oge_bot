@@ -198,14 +198,10 @@ async def on_shutdown(app):
     await bot.session.close()
 
 async def handle_webhook(request):
-    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
-        return web.Response(status=403)
-
     data = await request.json()
     update = types.Update(**data)
     await dp.feed_update(bot, update)
     return web.Response()
-
 def create_app():
     app = web.Application()
 
