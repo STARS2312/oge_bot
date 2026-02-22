@@ -17,7 +17,6 @@ async def main():
     print("BOT STARTING...")
     await init_db()
     print("DB OK")
-    await dp.start_polling(bot)
 
 # Старт
 @dp.message(Command("start"))
