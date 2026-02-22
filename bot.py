@@ -12,6 +12,11 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 user_sessions = {}
+async def main():
+    print("BOT STARTING...")
+    await init_db()
+    print("DB OK")
+    await dp.start_polling(bot)
 
 # Старт
 @dp.message(Command("start"))
