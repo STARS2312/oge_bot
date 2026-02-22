@@ -31,6 +31,7 @@ async def start(message: types.Message):
 
     await message.answer("Привет! Готовимся к ОГЭ по истории 📘", reply_markup=kb)
 
+
 # Начало теста
 @dp.callback_query(lambda c: c.data == "start_test")
 async def choose_theme(callback: types.CallbackQuery):
