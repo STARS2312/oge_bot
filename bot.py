@@ -13,10 +13,6 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 user_sessions = {}
-async def main():
-    print("BOT STARTING...")
-    await init_db()
-    print("DB OK")
 
 # Старт
 @dp.message(Command("start"))
