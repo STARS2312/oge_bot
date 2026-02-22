@@ -193,8 +193,9 @@ async def on_startup(app):
     print(f"Webhook set to {webhook_url}")
 
 async def on_shutdown(app):
+    print("Shutting down...")
     await bot.delete_webhook()
-    print("Webhook deleted")
+    await bot.session.close()
 
 async def handle_webhook(request):
     if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
