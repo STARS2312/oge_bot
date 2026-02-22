@@ -6,6 +6,7 @@ from config import TOKEN, ADMIN_ID
 from database import *
 from questions import questions
 from theory import theory_text
+import random
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -28,24 +29,45 @@ async def start(message: types.Message):
 # Начало теста
 @dp.callback_query(lambda c: c.data == "start_test")
 async def start_test(callback: types.CallbackQuery):
+    selected = random.sample(questions, 15 if len(questions) >= 15 else len(questions))
+
     user_sessions[callback.from_user.id] = {
         "current": 0,
-        "score": 0
+        "score": 0,
+        "questions": selected,
+        "answers": []
     }
+
     await send_question(callback.from_user.id)
     await callback.answer()
 
 async def send_question(user_id):
     session = user_sessions[user_id]
-    q = questions[session["current"]]
+    q = session["questions"][session["current"]]
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=opt, callback_data=f"answer_{i}")]
-        for i, opt in enumerate(q["options"])
-    ])
+    buttons = []
 
-    await bot.send_message(user_id, f"Вопрос {session['current']+1}/15\n\n{q['question']}", reply_markup=kb)
+    for i, option in enumerate(q["options"]):
+        buttons.append(
+            [InlineKeyboardButton(
+                text=option,
+                callback_data=f"answer_{i}"
+            )]
+        )
 
+    # Кнопка назад
+    if session["current"] > 0:
+        buttons.append(
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
+        )
+
+    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    await bot.send_message(
+        user_id,
+        f"📘 Вопрос {session['current'] + 1}/{len(session['questions'])}\n\n{q['question']}",
+        reply_markup=kb
+    )
 # Ответ
 @dp.callback_query(lambda c: c.data.startswith("answer_"))
 async def handle_answer(callback: types.CallbackQuery):
@@ -53,20 +75,45 @@ async def handle_answer(callback: types.CallbackQuery):
     session = user_sessions[user_id]
 
     answer = int(callback.data.split("_")[1])
-    correct = questions[session["current"]]["correct"]
+    q = session["questions"][session["current"]]
 
-    if answer == correct:
+    session["answers"].append(answer)
+
+    if answer == q["correct"]:
         session["score"] += 1
 
     session["current"] += 1
 
-    if session["current"] < 15:
+    if session["current"] < len(session["questions"]):
         await send_question(user_id)
     else:
         score = session["score"]
         await save_result(user_id, score)
-        await bot.send_message(user_id, f"Тест завершён!\n\nВаш результат: {score}/15")
+        await bot.send_message(
+            user_id,
+            f"🎉 Тест завершён!\n\nВаш результат: {score}/{len(session['questions'])}"
+        )
         del user_sessions[user_id]
+
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "back")
+async def go_back(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+    session = user_sessions[user_id]
+
+    if session["current"] > 0:
+        session["current"] -= 1
+        session["score"] = 0
+
+        # пересчитываем баллы заново
+        for i in range(session["current"]):
+            if session["answers"][i] == session["questions"][i]["correct"]:
+                session["score"] += 1
+
+        session["answers"] = session["answers"][:session["current"]]
+
+        await send_question(user_id)
 
     await callback.answer()
 
