@@ -173,13 +173,6 @@ async def admin(message: types.Message):
         return
     await message.answer("Админ-панель\n\n/users — статистика")
 
-# Запуск
-async def main():
-    await init_db()
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
 
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
