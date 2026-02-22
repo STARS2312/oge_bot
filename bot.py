@@ -186,8 +186,8 @@ async def on_startup(app):
     webhook_url = f"https://{domain}/webhook"
 
     await bot.set_webhook(
-        webhook_url,
-        secret_token=os.getenv("WEBHOOK_SECRET", "supersecret")
+    webhook_url,
+    secret_token=WEBHOOK_SECRET
     )
 
     print(f"Webhook set to {webhook_url}")
