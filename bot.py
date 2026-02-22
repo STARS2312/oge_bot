@@ -181,17 +181,14 @@ WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
 async def on_startup(app):
     await init_db()
 
-    domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
-
-    webhook_url = f"https://{domain}/webhook"
+    webhook_url = "https://ogebot-production.up.railway.app/webhook"
 
     await bot.set_webhook(
-    webhook_url,
-    secret_token=WEBHOOK_SECRET
+        webhook_url,
+        secret_token=WEBHOOK_SECRET
     )
 
     print(f"Webhook set to {webhook_url}")
-
 async def on_shutdown(app):
     print("Shutting down...")
     await bot.delete_webhook()
