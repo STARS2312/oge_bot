@@ -7,6 +7,7 @@ from database import *
 from questions import questions
 from theory import theory_text
 import random
+from aiohttp import web
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -183,3 +184,46 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
+
+async def on_startup(app):
+    webhook_url = os.getenv("RAILWAY_STATIC_URL")
+    if not webhook_url:
+        webhook_url = os.getenv("RENDER_EXTERNAL_URL")
+    if not webhook_url:
+        webhook_url = os.getenv("PUBLIC_URL")
+
+    webhook_url = f"{webhook_url}{WEBHOOK_PATH}"
+
+    await bot.set_webhook(
+        webhook_url,
+        secret_token=WEBHOOK_SECRET
+    )
+    print(f"Webhook set to {webhook_url}")
+
+async def on_shutdown(app):
+    await bot.delete_webhook()
+    print("Webhook deleted")
+
+async def handle_webhook(request):
+    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
+        return web.Response(status=403)
+
+    data = await request.json()
+    update = types.Update(**data)
+    await dp.feed_update(bot, update)
+    return web.Response()
+
+def create_app():
+    app = web.Application()
+    app.router.add_post(WEBHOOK_PATH, handle_webhook)
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
+    return app
+
+if __name__ == "__main__":
+    app = create_app()
+    port = int(os.getenv("PORT", 8080))
+    web.run_app(app, host="0.0.0.0", port=port)
