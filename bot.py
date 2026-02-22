@@ -181,7 +181,7 @@ WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
 async def on_startup(app):
     await init_db()
 
-    webhook_url = "https://ogebot-production.up.railway.app/webhook"
+    webhook_url = "https://ogebot-production.up.railway.app"
 
     await bot.set_webhook(
         webhook_url,
