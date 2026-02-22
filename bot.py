@@ -59,15 +59,8 @@ async def start_test(callback: types.CallbackQuery):
         theme_questions,
         15 if len(theme_questions) >= 15 else len(theme_questions)
     )
-
-    user_sessions[callback.from_user.id] = {
-        "current": 0,
-        "score": 0,
-        "questions": selected,
-        "theme": theme
-    }
-
-    async def send_question(user_id):
+# ----------------- ОТПРАВКА ВОПРОСА -----------------
+async def send_question(user_id):
     session = user_sessions[user_id]
     q = session["questions"][session["current"]]
 
@@ -83,48 +76,9 @@ async def start_test(callback: types.CallbackQuery):
     )
 
     session["last_message_id"] = message.message_id
-    await bot.send_message(
-        user_id,
-        f"📘 Вопрос {session['current'] + 1}/{len(session['questions'])}\n\n{q['question']}",
-        reply_markup=kb
-    )
-    @dp.callback_query(lambda c: c.data.startswith("answer_"))
 
-@dp.callback_query(lambda c: c.data.startswith("answer_"))
-async def handle_answer(callback: types.CallbackQuery):
-    user_id = callback.from_user.id
-    session = user_sessions[user_id]
 
-    answer = int(callback.data.split("_")[1])
-    q = session["questions"][session["current"]]
-
-    try:
-        await bot.delete_message(user_id, session["last_message_id"])
-    except:
-        pass
-
-    if answer == q["correct"]:
-        session["score"] += 1
-
-    session["current"] += 1
-
-    if session["current"] < len(session["questions"]):
-        await send_question(user_id)
-    else:
-        score = session["score"]
-        await save_result(user_id, score)
-
-        await bot.send_message(
-            user_id,
-            f"🎉 Тест завершён!\n\n"
-            f"Результат: {score}/{len(session['questions'])}"
-        )
-
-        del user_sessions[user_id]
-
-    await callback.answer()
-    
-# Ответ
+# ----------------- ОБРАБОТКА ОТВЕТА -----------------
 @dp.callback_query(lambda c: c.data.startswith("answer_"))
 async def handle_answer(callback: types.CallbackQuery):
     user_id = callback.from_user.id
@@ -159,7 +113,6 @@ async def handle_answer(callback: types.CallbackQuery):
         del user_sessions[user_id]
 
     await callback.answer()
-
 @dp.callback_query(lambda c: c.data == "back")
 async def go_back(callback: types.CallbackQuery):
     user_id = callback.from_user.id
