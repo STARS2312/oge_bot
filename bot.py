@@ -179,18 +179,19 @@ WEBHOOK_PATH = "/webhook"
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
 
 async def on_startup(app):
-    webhook_url = os.getenv("RAILWAY_STATIC_URL")
-    if not webhook_url:
-        webhook_url = os.getenv("RENDER_EXTERNAL_URL")
-    if not webhook_url:
-        webhook_url = os.getenv("PUBLIC_URL")
+    await init_db()
 
-    webhook_url = f"{webhook_url}{WEBHOOK_PATH}"
+    domain = os.getenv("RAILWAY_STATIC_URL")
+    if not domain:
+        domain = os.getenv("PUBLIC_URL")
+
+    webhook_url = f"https://{domain}/webhook"
 
     await bot.set_webhook(
         webhook_url,
-        secret_token=WEBHOOK_SECRET
+        secret_token=os.getenv("WEBHOOK_SECRET", "supersecret")
     )
+
     print(f"Webhook set to {webhook_url}")
 
 async def on_shutdown(app):
