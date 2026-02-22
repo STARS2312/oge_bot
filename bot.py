@@ -3,6 +3,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 from config import TOKEN, ADMIN_ID
+import os
 from database import *
 from questions import questions
 from theory import theory_text
