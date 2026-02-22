@@ -181,9 +181,7 @@ WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
 async def on_startup(app):
     await init_db()
 
-    domain = os.getenv("RAILWAY_STATIC_URL")
-    if not domain:
-        domain = os.getenv("PUBLIC_URL")
+    domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
 
     webhook_url = f"https://{domain}/webhook"
 
