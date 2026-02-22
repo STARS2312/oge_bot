@@ -89,6 +89,8 @@ async def start_test(callback: types.CallbackQuery):
         reply_markup=kb
     )
     @dp.callback_query(lambda c: c.data.startswith("answer_"))
+
+@dp.callback_query(lambda c: c.data.startswith("answer_"))
 async def handle_answer(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     session = user_sessions[user_id]
@@ -96,7 +98,6 @@ async def handle_answer(callback: types.CallbackQuery):
     answer = int(callback.data.split("_")[1])
     q = session["questions"][session["current"]]
 
-    # удаляем прошлый вопрос
     try:
         await bot.delete_message(user_id, session["last_message_id"])
     except:
@@ -116,13 +117,13 @@ async def handle_answer(callback: types.CallbackQuery):
         await bot.send_message(
             user_id,
             f"🎉 Тест завершён!\n\n"
-            f"Тема: {session['theme'].upper()}\n"
             f"Результат: {score}/{len(session['questions'])}"
         )
 
         del user_sessions[user_id]
 
     await callback.answer()
+    
 # Ответ
 @dp.callback_query(lambda c: c.data.startswith("answer_"))
 async def handle_answer(callback: types.CallbackQuery):
