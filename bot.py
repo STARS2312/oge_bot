@@ -208,10 +208,18 @@ async def handle_webhook(request):
 
 def create_app():
     app = web.Application()
+
+    app.router.add_get("/", health_check)
     app.router.add_post(WEBHOOK_PATH, handle_webhook)
+
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
+
     return app
+
+
+async def health_check(request):
+    return web.Response(text="OK")
 
 if __name__ == "__main__":
     app = create_app()
