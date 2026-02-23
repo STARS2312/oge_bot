@@ -84,7 +84,7 @@ questions = {
             "correct": 1
         },
     ],
-    "world_austria": [
+    "austria": [
         {
             "question": "В каком году началась Первая мировая война?",
             "options": ["1912", "1914", "1916", "1918"],
