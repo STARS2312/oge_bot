@@ -38,11 +38,11 @@ async def test(message: types.Message):
 @dp.callback_query(lambda c: c.data == "start_test")
 async def choose_theme(callback: types.CallbackQuery):
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👑 Империя", callback_data="r_empire")],
-        [InlineKeyboardButton(text="⚔ Древняя Русь", callback_data="rus")],
-        [InlineKeyboardButton(text="Франция", callback_data="world_france")],
-        [InlineKeyboardButton(text="Америка", callback_data="world_america")],
-        [InlineKeyboardButton(text="Австрия", callback_data="austria")]
+        [InlineKeyboardButton(text="👑 Империя", callback_data="theme_r_empire")],
+        [InlineKeyboardButton(text="⚔ Древняя Русь", callback_data="theme_rus")],
+        [InlineKeyboardButton(text="Франция", callback_data="theme_world_france")],
+        [InlineKeyboardButton(text="Америка", callback_data="theme_world_america")],
+        [InlineKeyboardButton(text="Австрия", callback_data="theme_austria")]
     ])
     await callback.message.edit_text("Выберите тему:", reply_markup=kb)
     await callback.answer()
@@ -61,8 +61,12 @@ async def send_question(user_id):
         )
 @dp.callback_query(lambda c: c.data.startswith("theme_"))
 async def start_test(callback: types.CallbackQuery):
-    theme = callback.data.split("_")[1]
+    theme = callback.data.replace("theme_", "")
+    print("THEME:", theme)
     theme_questions = questions[theme]
+
+
+   
 
     selected = random.sample(
         theme_questions,
