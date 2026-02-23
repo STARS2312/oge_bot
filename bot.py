@@ -202,9 +202,6 @@ async def health_check(request):
     
 
 async def handle_webhook(request):
-    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
-        return web.Response(status=403)
-
     data = await request.json()
     update = types.Update(**data)
     await dp.feed_update(bot, update)
