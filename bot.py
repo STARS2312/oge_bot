@@ -68,8 +68,9 @@ async def send_question(user_id):
 async def start_test(callback: types.CallbackQuery):
     theme = callback.data.replace("theme_", "")
 
-    print("THEME:", theme)  # временно для проверки
-
+    if theme not in questions:
+        await callback.message.answer("Ошибка темы.")
+        return
     theme_questions = questions[theme]
 
    
