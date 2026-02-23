@@ -30,6 +30,11 @@ async def start(message: types.Message):
     await message.answer("Привет! Готовимся к ОГЭ по истории 📘", reply_markup=kb)
 
 @dp.message()
+async def test_any(message: types.Message):
+    print("MESSAGE RECEIVED")
+    await message.answer("Я жив")
+
+@dp.message()
 async def test(message: types.Message):
     print("MESSAGE HANDLER TRIGGERED")
     await message.answer("TEST OK")
