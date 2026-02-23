@@ -203,9 +203,14 @@ async def health_check(request):
     
 
 async def handle_webhook(request):
+    print("WEBHOOK REQUEST RECEIVED")
+
     data = await request.json()
+    print("DATA:", data)
+
     update = Update.model_validate(data)
     await dp.feed_update(bot, update)
+
     return web.Response(text="OK")
 
 
