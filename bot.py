@@ -62,9 +62,10 @@ async def send_question(user_id):
 @dp.callback_query(lambda c: c.data.startswith("theme_"))
 async def start_test(callback: types.CallbackQuery):
     theme = callback.data.replace("theme_", "")
-    print("THEME:", theme)
-    theme_questions = questions[theme]
 
+    print("THEME:", theme)  # временно для проверки
+
+    theme_questions = questions[theme]
 
    
 
