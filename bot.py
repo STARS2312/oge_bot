@@ -24,7 +24,7 @@ async def start(message: types.Message):
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📚 Начать тест", callback_data="start_test")],
         [InlineKeyboardButton(text="📖 Теория", callback_data="theory")],
-        [InlineKeyboardButton(text="📊 Статистика", callback_data="stats")]
+        [InlineKeyboardButton(text="📊 гавно", callback_data="stats")]
     ])
 
     await message.answer("Привет! Готовимся к ОГЭ по истории 📘", reply_markup=kb)
@@ -38,12 +38,11 @@ async def test(message: types.Message):
 @dp.callback_query(lambda c: c.data == "start_test")
 async def choose_theme(callback: types.CallbackQuery):
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👑 Империя", callback_data="theme_r_empire")],
-        [InlineKeyboardButton(text="⚔ Древняя Русь", callback_data="theme_rus")],
-        [InlineKeyboardButton(text="Франция", callback_data="theme_world_france")],
-        [InlineKeyboardButton(text="Америка", callback_data="theme_world_america")],
-        [InlineKeyboardButton(text="⚔ Древняя Русь", callback_data="theme_rus")],
-        [InlineKeyboardButton(text="Австрия", callback_data="theme_austria")]
+        [InlineKeyboardButton(text="👑 Империя", callback_data="r_empire")],
+        [InlineKeyboardButton(text="⚔ Древняя Русь", callback_data="rus")],
+        [InlineKeyboardButton(text="Франция", callback_data="world_france")],
+        [InlineKeyboardButton(text="Америка", callback_data="world_america")],
+        [InlineKeyboardButton(text="Австрия", callback_data="austria")]
     ])
     await callback.message.edit_text("Выберите тему:", reply_markup=kb)
     await callback.answer()
