@@ -6,6 +6,7 @@ from config import TOKEN, ADMIN_ID
 import os
 from database import *
 from questions import questions
+from aiogram.types import Update
 from theory import theory_text
 import random
 from aiohttp import web
@@ -203,9 +204,9 @@ async def health_check(request):
 
 async def handle_webhook(request):
     data = await request.json()
-    update = types.Update(**data)
+    update = Update.model_validate(data)
     await dp.feed_update(bot, update)
-    return web.Response()
+    return web.Response(text="OK")
 
 
 def create_app():
