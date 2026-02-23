@@ -49,7 +49,7 @@ async def choose_theme(callback: types.CallbackQuery):
         [InlineKeyboardButton(text="Америка", callback_data="theme_world_america")],
         [InlineKeyboardButton(text="Австрия", callback_data="theme_austria")]
     ])
-    await callback.message.edit_text("Выберите тему:", reply_markup=kb)
+    await callback.message.answer("Выберите тему:", reply_markup=kb)
     await callback.answer()
 async def send_question(user_id):
     session = user_sessions[user_id]
