@@ -221,7 +221,7 @@ async def handle_webhook(request):
 def create_app():
     app = web.Application()
 
-    app.router.add_post(WEBHOOK_PATH, handle_webhook)
+    app.router.add_post("/webhook", handle_webhook)
     app.router.add_get("/", health_check)
 
     app.on_startup.append(on_startup)
